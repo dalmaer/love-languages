@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Love Languages — The Quiz</title>
+<style>
+  :root{
+    --wine:#2E0511;
+    --wine-2:#3A0917;
+    --red:#FF2A47;
+    --red-deep:#C1002E;
+    --blush:#FFC9D2;
+    --cream:#FFF3E9;
+    --gold:#F6C453;
+    --ink:#26060E;
+    /* C1: Rockwell carries the display voice, Avenir Next does the reading.
+       Typewolf pairs Rockwell with Circular; Avenir Next is the nearest thing
+       to Circular that ships on a Mac. */
+    --display: "Rockwell","Rockwell Nova","Bookman Old Style",Georgia,"Times New Roman",serif;
+    --text: "Avenir Next","Avenir","Nunito Sans","Helvetica Neue",system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:var(--text);
+    color:var(--cream);
+    background:
+      radial-gradient(120% 85% at 50% -12%, #B00A32 0%, rgba(176,10,50,0) 62%),
+      radial-gradient(95% 65% at 88% 112%, #C21038 0%, rgba(194,16,56,0) 58%),
+      radial-gradient(70% 50% at 8% 60%, #7C0724 0%, rgba(124,7,36,0) 60%),
+      var(--wine);
+    background-attachment:fixed;
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    justify-content:center;
+    padding:clamp(16px,3vw,40px);
+  }
+  .stage{width:min(880px,100%);display:flex;flex-direction:column;min-height:calc(100vh - clamp(32px,6vw,80px))}
+  .view{display:none;flex:1;flex-direction:column;animation:rise .45s cubic-bezier(.2,.7,.3,1) both}
+  .view.on{display:flex}
+  @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+  /* ---------- start ---------- */
+  .hero{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:clamp(18px,3vw,30px);padding:6vh 0}
+  .kicker{
+    font:700 clamp(11px,1.5vw,14px)/1 var(--text);
+    letter-spacing:.42em;text-transform:uppercase;color:var(--gold);
+    padding-left:.42em;
+  }
+  h1{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(50px,10.4vw,118px);
+    line-height:.94;
+    letter-spacing:-.024em;
+    color:var(--cream);
+    text-shadow:0 6px 0 rgba(0,0,0,.22);
+  }
+  h1 em{font-style:normal;display:block;color:var(--red);}
+  .lede{font-size:clamp(17px,2.3vw,23px);line-height:1.45;max-width:34ch;color:var(--blush)}
+  .btn{
+    border:0;cursor:pointer;font-family:var(--text);
+    font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+    background:var(--red);color:#fff;
+    font-size:clamp(16px,2.1vw,21px);
+    padding:clamp(20px,2.6vw,26px) clamp(40px,6vw,68px);
+    border-radius:999px;
+    box-shadow:0 14px 0 var(--red-deep), 0 22px 40px rgba(0,0,0,.42);
+    transition:transform .12s ease, box-shadow .12s ease, background .12s ease;
+  }
+  .btn:hover{background:#FF465E;transform:translateY(-2px);box-shadow:0 16px 0 var(--red-deep),0 26px 46px rgba(0,0,0,.46)}
+  .btn:active{transform:translateY(9px);box-shadow:0 5px 0 var(--red-deep),0 8px 18px rgba(0,0,0,.4)}
+  .btn:focus-visible{outline:3px solid var(--gold);outline-offset:5px}
+  .meta{font-size:14px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,201,210,.72)}
+  .langstrip{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:44ch}
+  .chip{
+    border:1px solid rgba(255,201,210,.34);border-radius:8px;
+    padding:8px 14px;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--blush)
+  }
+
+  /* ---------- quiz ---------- */
+  .quizbar{display:flex;align-items:center;gap:16px;padding-bottom:clamp(18px,3vw,30px)}
+  .count{font:800 13px/1 var(--text);letter-spacing:.2em;color:var(--gold);white-space:nowrap}
+  .track{flex:1;height:8px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden}
+  .fill{height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--red));border-radius:99px;transition:width .35s cubic-bezier(.2,.7,.3,1)}
+  .back{
+    background:none;border:1px solid rgba(255,243,233,.3);color:var(--cream);
+    border-radius:99px;padding:9px 16px;font:700 12px/1 var(--text);letter-spacing:.14em;
+    text-transform:uppercase;cursor:pointer;transition:border-color .15s,background .15s
+  }
+  .back:hover{background:rgba(255,243,233,.1);border-color:var(--cream)}
+  .back[disabled]{opacity:.28;cursor:default}
+  .prompt{
+    font-family:var(--display);font-weight:700;
+    font-size:clamp(34px,5.8vw,62px);line-height:1.06;letter-spacing:-.018em;
+    text-align:center;margin-bottom:clamp(20px,3.4vw,34px);color:var(--cream);
+    text-shadow:0 4px 0 rgba(0,0,0,.28)
+  }
+  .prompt span{color:var(--red)}
+  .choices{display:grid;gap:clamp(14px,2vw,20px);flex:1;align-content:center;padding-bottom:clamp(18px,3vw,28px)}
+  .choice{
+    position:relative;text-align:left;cursor:pointer;width:100%;
+    background:var(--cream);color:var(--ink);border:0;
+    border-radius:26px 26px 26px 6px;
+    padding:clamp(24px,3.4vw,38px) clamp(26px,4vw,44px);
+    font-family:var(--text);font-weight:600;
+    font-size:clamp(21px,3.1vw,33px);line-height:1.26;letter-spacing:-.004em;
+    box-shadow:0 10px 0 rgba(0,0,0,.3);
+    transition:transform .13s ease, box-shadow .13s ease, background .13s ease, color .13s ease;
+  }
+  .choice + .choice{border-radius:26px 26px 6px 26px}
+  .choice:hover{background:#fff;transform:translateY(-3px) rotate(-.35deg);box-shadow:0 15px 0 rgba(0,0,0,.32)}
+  .choice + .choice:hover{transform:translateY(-3px) rotate(.35deg)}
+  .choice:active,.choice.hit{background:var(--red);color:#fff;transform:translateY(6px);box-shadow:0 4px 0 var(--red-deep)}
+  .choice:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+  .key{
+    position:absolute;top:-12px;right:20px;
+    background:var(--gold);color:var(--ink);
+    font:800 12px/1 var(--text);letter-spacing:.1em;
+    padding:8px 12px;border-radius:8px;
+  }
+  .hint{text-align:center;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,201,210,.6)}
+
+  /* ---------- results ---------- */
+  .rhead{text-align:center;padding:clamp(10px,3vw,26px) 0 clamp(22px,3.5vw,36px)}
+  .rhead h2{
+    font-family:var(--display);font-weight:700;
+    font-size:clamp(34px,7vw,74px);line-height:.98;color:var(--red);letter-spacing:-.022em
+  }
+  .rhead h2 small{display:block;font-size:clamp(13px,1.8vw,16px);letter-spacing:.4em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;font-family:var(--text);font-weight:700}
+  .rhead p{max-width:46ch;margin:18px auto 0;font-size:clamp(16px,2.1vw,20px);line-height:1.5;color:var(--blush)}
+  .rows{display:flex;flex-direction:column;gap:12px}
+  .row{
+    background:rgba(255,243,233,.07);
+    border:1px solid rgba(255,243,233,.14);
+    border-radius:20px;padding:clamp(16px,2.4vw,22px) clamp(18px,2.8vw,26px);
+  }
+  .row.champ{background:var(--cream);border-color:var(--cream);color:var(--ink)}
+  .rowline{display:flex;align-items:baseline;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .rname{font-family:var(--display);font-weight:700;font-size:clamp(21px,3vw,33px);line-height:1.06;letter-spacing:-.018em}
+  .tag{
+    font:800 clamp(10px,1.4vw,12.5px)/1 var(--text);letter-spacing:.16em;text-transform:uppercase;
+    padding:9px 13px;border-radius:7px;white-space:nowrap;
+    background:var(--red);color:#fff;
+  }
+  .tag.l1{background:var(--red)}
+  .tag.l2{background:var(--gold);color:var(--ink)}
+  .tag.l3{background:rgba(255,201,210,.26);color:var(--blush)}
+  .row.champ .tag.l3{background:rgba(38,6,14,.12);color:var(--ink)}
+  .tag.l4{background:transparent;color:rgba(255,201,210,.7);border:1px solid rgba(255,201,210,.4)}
+  .row.champ .tag.l4{color:rgba(38,6,14,.6);border-color:rgba(38,6,14,.3)}
+  .bar{height:12px;border-radius:99px;background:rgba(0,0,0,.28);margin:14px 0 12px;overflow:hidden}
+  .row.champ .bar{background:rgba(38,6,14,.12)}
+  .bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--red));width:0;transition:width .8s cubic-bezier(.2,.7,.3,1)}
+  .row.champ .bar i{background:linear-gradient(90deg,var(--red-deep),var(--red))}
+  .blurb{flex:1 1 260px;font-size:clamp(14.5px,1.9vw,17px);line-height:1.5;color:rgba(255,243,233,.78)}
+  .row.champ .blurb{color:rgba(38,6,14,.78)}
+  .score{font:800 13px/1 var(--text);letter-spacing:.1em;opacity:.7;white-space:nowrap;margin-left:auto}
+  .actions{display:flex;flex-direction:column;align-items:center;gap:16px;padding:clamp(28px,4vw,44px) 0 10px}
+  .handoff{font-size:clamp(15px,2.1vw,19px);color:var(--blush);text-align:center;max-width:34ch}
+  .ghost{
+    background:none;border:1px solid rgba(255,243,233,.34);color:var(--cream);
+    border-radius:99px;padding:14px 26px;font:700 12.5px/1 var(--text);
+    letter-spacing:.16em;text-transform:uppercase;cursor:pointer;
+    transition:background .15s,border-color .15s
+  }
+  .ghost:hover{background:rgba(255,243,233,.1);border-color:var(--cream)}
+  .ghost:focus-visible{outline:3px solid var(--gold);outline-offset:4px}
+  .urlbox{
+    width:min(560px,100%);background:rgba(0,0,0,.32);
+    border:1px solid rgba(255,243,233,.3);color:var(--cream);border-radius:12px;
+    padding:14px 16px;font:500 14px/1.3 var(--text);text-align:center
+  }
+  footer{text-align:center;font-size:12px;letter-spacing:.1em;color:rgba(255,201,210,.42);padding:22px 0 4px;line-height:1.7}
+
+  @media (min-width:720px){ .choices{gap:22px} }
+  @media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+</style>
+</head>
+<body>
+<div class="stage">
+
+  <!-- START -->
+  <section class="view on" id="v-start">
+    <div class="hero">
+      <p class="kicker">Five languages · one you</p>
+      <h1>Love<em>Languages</em></h1>
+      <p class="lede">Thirty quick picks. No right answers. At the end we tell you what you actually need — and what you can live without.</p>
+      <button class="btn" id="go">Let's go</button>
+      <p class="meta">30 questions · about 3 minutes</p>
+      <div class="langstrip">
+        <span class="chip">Words</span><span class="chip">Acts of Service</span>
+        <span class="chip">Gifts</span><span class="chip">Quality Time</span><span class="chip">Touch</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="view" id="v-quiz">
+    <div class="quizbar">
+      <button class="back" id="back">← Back</button>
+      <div class="track"><div class="fill" id="fill"></div></div>
+      <div class="count" id="count">01 / 30</div>
+    </div>
+    <p class="prompt">It means more to me when <span>my person…</span></p>
+    <div class="choices">
+      <button class="choice" id="c0"><span class="key">1</span><span id="t0"></span></button>
+      <button class="choice" id="c1"><span class="key">2</span><span id="t1"></span></button>
+    </div>
+    <p class="hint">Pick the one that hits harder · keys 1 and 2</p>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="view" id="v-done">
+    <div class="rhead">
+      <h2><small id="rlabel">Your love language is</small><span id="winner"></span></h2>
+      <p id="verdict"></p>
+    </div>
+    <div class="rows" id="rows"></div>
+    <div class="actions" id="actions"></div>
+    <footer>
+      Based on the five love languages framework by Gary Chapman.<br>
+      For fun and conversation — not a diagnosis.
+    </footer>
+  </section>
+
+</div>
+
+<script>
+const LANGS = {
+  W:{name:"Words of Affirmation", blurb:"Say it out loud. Praise, encouragement and a plain “I’m proud of you” land harder on you than anything anyone could buy."},
+  A:{name:"Acts of Service",       blurb:"Do the thing. A chore quietly taken off your plate reads as devotion — effort is the love letter."},
+  G:{name:"Receiving Gifts",       blurb:"It was never the price. A gift is proof you were on someone’s mind while they were out living their day."},
+  Q:{name:"Quality Time",          blurb:"Undivided attention. Phone face-down, nowhere else to be, no half-listening — that’s the whole thing."},
+  T:{name:"Physical Touch",        blurb:"Contact is the message. A hand on your back, a hug at the door, sitting close enough to feel it."}
+};
+const ORDER = ["W","A","G","Q","T"];
+
+/* 10 head-to-head matchups, 3 rounds each = 30 forced-choice questions.
+   Every language meets every other language three times, so 12 is a clean sweep. */
+const PAIRS = [
+  {a:"W",b:"A",qs:[
+    ["tells me they’re proud of me","handles a chore I’ve been dreading"],
+    ["leaves me a note that says something sweet","fills up my gas tank without being asked"],
+    ["brags about me to their friends","makes me breakfast on a rough morning"]]},
+  {a:"W",b:"G",qs:[
+    ["says exactly why they appreciate me","brings me back something from their trip"],
+    ["sends me a long text about how they feel","surprises me with my favorite snack"],
+    ["compliments something I worked hard on","gives me a gift that proves they were listening"]]},
+  {a:"W",b:"Q",qs:[
+    ["tells me I look incredible tonight","puts their phone away for the whole dinner"],
+    ["reminds me what they love about us","takes a long walk with me, no agenda"],
+    ["cheers me on out loud in front of people","plans a whole day around just us"]]},
+  {a:"W",b:"T",qs:[
+    ["whispers something kind to me","reaches for my hand across the table"],
+    ["tells me I’m the best part of their day","hugs me the second I walk in"],
+    ["writes me a message I’ll reread later","sits close enough that we’re touching"]]},
+  {a:"A",b:"G",qs:[
+    ["does the dishes so I don’t have to","picks up flowers on the way home"],
+    ["runs the errand I’ve been putting off","wraps up something small, just because"],
+    ["fixes the thing that’s been broken for weeks","kept a souvenir from our first date"]]},
+  {a:"A",b:"Q",qs:[
+    ["takes something off my plate this week","clears their whole evening to be with me"],
+    ["drives so I can rest on the way home","stays up talking with me past midnight"],
+    ["packs my bag before a trip","comes along on a boring errand just to be there"]]},
+  {a:"A",b:"T",qs:[
+    ["brings me coffee before I ask","rubs my shoulders after a long day"],
+    ["cleans up without a word about it","pulls me in for a slow hug"],
+    ["handles the thing I’ve been anxious about","keeps a hand on my back in a crowd"]]},
+  {a:"G",b:"Q",qs:[
+    ["gives me the thing I’d never buy myself","plans an evening with zero distractions"],
+    ["saved the ticket stub from our night out","spends a lazy Sunday doing nothing with me"],
+    ["surprises me with a small present midweek","asks about my day and actually listens"]]},
+  {a:"G",b:"T",qs:[
+    ["leaves a little gift on my pillow","kisses me hello before anything else"],
+    ["brings me something that made them think of me","falls asleep holding onto me"],
+    ["remembered the thing I mentioned once and bought it","squeezes my knee under the table"]]},
+  {a:"Q",b:"T",qs:[
+    ["gives me their full attention for an hour","curls up on the couch with me"],
+    ["takes a trip with just me, nobody else","greets me with a real, long hug"],
+    ["sits with me while I vent and doesn’t try to fix it","finds a reason to touch my arm all night"]]}
+];
+
+/* Interleave rounds so the same matchup never repeats back to back,
+   and flip which side each language sits on to cancel out position bias. */
+const QUESTIONS = [];
+for (let round = 0; round < 3; round++) {
+  PAIRS.forEach((p, i) => {
+    const left  = {k:p.a, t:p.qs[round][0]};
+    const right = {k:p.b, t:p.qs[round][1]};
+    QUESTIONS.push((round + i) % 2 ? {a:right, b:left} : {a:left, b:right});
+  });
+}
+
+const LEVELS = [
+  {min:10, label:"Must have",         cls:"l1"},
+  {min:7,  label:"Big deal",          cls:"l1"},
+  {min:4,  label:"Nice to have",      cls:"l2"},
+  {min:2,  label:"Take it or leave it",cls:"l3"},
+  {min:0,  label:"Don’t bother", cls:"l4"}
+];
+const levelFor = n => LEVELS.find(l => n >= l.min);
+
+const $ = id => document.getElementById(id);
+const views = {start:$("v-start"), quiz:$("v-quiz"), done:$("v-done")};
+let idx = 0, answers = [];
+
+function show(name){
+  Object.values(views).forEach(v => v.classList.remove("on"));
+  views[name].classList.add("on");
+}
+
+function render(){
+  const q = QUESTIONS[idx];
+  $("t0").textContent = q.a.t;
+  $("t1").textContent = q.b.t;
+  $("c0").classList.remove("hit");
+  $("c1").classList.remove("hit");
+  $("count").textContent = String(idx + 1).padStart(2,"0") + " / " + QUESTIONS.length;
+  $("fill").style.width = (idx / QUESTIONS.length * 100) + "%";
+  $("back").disabled = idx === 0;
+}
+
+function pick(side){
+  if (views.quiz.classList.contains("on") === false) return;
+  const q = QUESTIONS[idx];
+  answers[idx] = side === 0 ? q.a.k : q.b.k;
+  $(side === 0 ? "c0" : "c1").classList.add("hit");
+  setTimeout(() => {
+    if (idx === QUESTIONS.length - 1) { finish(); }
+    else { idx++; render(); }
+  }, 170);
+}
+
+function tally(){
+  const s = {W:0,A:0,G:0,Q:0,T:0};
+  answers.forEach(k => s[k]++);
+  return s;
+}
+
+/* ---- shareable links ---------------------------------------------------
+   A finished quiz is five numbers, each 0–12, summing to 30 — so the whole
+   result fits in five characters and rides in the URL fragment. No database:
+   the link works forever, costs nothing to keep alive, and nothing about
+   anybody is stored anywhere, here or on a server. */
+const ALPH = "0123456789abc";                       // base 13, one char per score
+const encode = s => ORDER.map(k => ALPH[s[k]]).join("");
+
+function decode(str){
+  if (!/^[0-9abc]{5}$/.test(str || "")) return null;
+  const s = {};
+  ORDER.forEach((k, i) => { s[k] = ALPH.indexOf(str[i]); });
+  if (ORDER.reduce((a, k) => a + s[k], 0) !== 30) return null;   // reject junk
+  return s;
+}
+
+const bareUrl = () => location.href.split("#")[0];
+const resultUrl = s => bareUrl() + "#r=" + encode(s);
+const setUrl = (url) => { try { history.replaceState(null, "", url); } catch (e) {} };
+
+async function share(btn, s){
+  const url = resultUrl(s), label = btn.textContent;
+  if (navigator.share) {
+    try { await navigator.share({ title:"My love languages", text:"Here’s what I actually need.", url }); return; }
+    catch (e) { if (e.name === "AbortError") return; }
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    btn.textContent = "Link copied!";
+    setTimeout(() => { btn.textContent = label; }, 2200);
+    return;
+  } catch (e) {}
+  // no clipboard (insecure context, or the browser said no) — show it to copy by hand
+  let box = $("fallback");
+  if (!box) {
+    box = document.createElement("input");
+    box.id = "fallback"; box.className = "urlbox"; box.readOnly = true;
+    $("actions").append(box);
+  }
+  box.value = url; box.focus(); box.select();
+}
+
+function renderActions(s, shared){
+  const box = $("actions");
+  box.textContent = "";
+  const button = (cls, text, fn) => {
+    const b = document.createElement("button");
+    b.className = cls; b.textContent = text;
+    b.addEventListener("click", fn);
+    return b;
+  };
+  if (shared) {
+    const p = document.createElement("p");
+    p.className = "handoff";
+    p.textContent = "Someone sent you their results.";
+    box.append(p, button("btn", "What’s your love language? Find out!", start));
+  } else {
+    box.append(
+      button("btn", "Share your results!", (e) => share(e.currentTarget, s)),
+      button("ghost", "Take it again", start)
+    );
+  }
+}
+
+function finish(){
+  const s = tally();
+  setUrl(resultUrl(s));          // the result is saved the moment it exists
+  showResult(s, false);
+}
+
+function showResult(s, shared){
+  const ranked = ORDER.slice().sort((x,y) => s[y] - s[x] || ORDER.indexOf(x) - ORDER.indexOf(y));
+  const top = ranked[0], runner = ranked[1];
+  const tied = s[runner] === s[top];
+  /* The blurb already sits in the card below, so the headline says something
+     else — and that keeps this the only place pronouns have to change. */
+  const field = shared ? "how the rest of their field stacks up." : "how the rest of your field stacks up.";
+  $("rlabel").textContent = shared ? "Their love language is" : "Your love language is";
+  $("winner").textContent = LANGS[top].name;
+  $("verdict").textContent = tied
+    ? "Dead heat with " + LANGS[runner].name + ". " + (shared ? "They need" : "You need")
+      + " both, and a partner who only brings one will feel like they’re trying — but missing."
+    : (shared ? "That’s what they need most. " : "That’s what you need most. ") + "Everything below is " + field;
+
+  $("rows").innerHTML = ranked.map((k, i) => {
+    const n = s[k], lv = levelFor(n);
+    return '<div class="row' + (i === 0 ? " champ" : "") + '">'
+      + '<div class="rowline"><div class="rname">' + LANGS[k].name + '</div>'
+      + '<div class="tag ' + lv.cls + '">' + lv.label + '</div></div>'
+      + '<div class="bar"><i data-w="' + Math.round(n / 12 * 100) + '"></i></div>'
+      + '<div class="rowline"><div class="blurb">' + LANGS[k].blurb + '</div>'
+      + '<div class="score">' + n + ' / 12</div></div></div>';
+  }).join("");
+
+  renderActions(s, shared);
+  show("done");
+  requestAnimationFrame(() => {
+    document.querySelectorAll(".bar i").forEach(el => { el.style.width = el.dataset.w + "%"; });
+  });
+  window.scrollTo(0,0);
+}
+
+function start(){
+  idx = 0; answers = [];
+  setUrl(bareUrl());
+  render();
+  show("quiz");
+  window.scrollTo(0,0);
+}
+
+$("go").addEventListener("click", start);
+$("c0").addEventListener("click", () => pick(0));
+$("c1").addEventListener("click", () => pick(1));
+$("back").addEventListener("click", () => { if (idx > 0) { idx--; render(); } });
+
+const linked = () => decode((/^#r=(.+)$/.exec(location.hash) || [])[1]);
+
+/* Opening a shared link is a fresh load, but the fragment can also change
+   under a page that is already open — back/forward, or a link pasted in. */
+window.addEventListener("hashchange", () => {
+  const s = linked();
+  if (s) { showResult(s, true); window.scrollTo(0,0); }
+  else if (!location.hash && !views.quiz.classList.contains("on")) show("start");
+});
+
+const fromLink = linked();
+if (fromLink) showResult(fromLink, true);
+
+document.addEventListener("keydown", e => {
+  if (views.quiz.classList.contains("on")) {
+    if (e.key === "1" || e.key === "ArrowLeft")  pick(0);
+    if (e.key === "2" || e.key === "ArrowRight") pick(1);
+    if (e.key === "Backspace" && idx > 0) { e.preventDefault(); idx--; render(); }
+  } else if (e.key === "Enter") {
+    start();
+  }
+});
+</script>
+</body>
+</html>
